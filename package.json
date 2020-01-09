@@ -4,9 +4,10 @@
   "description": "Cluster Static Server based on Fastify NodeJS.",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "master": "node server-master.js",
-    "node": "node server-node.js"
+    "node": "node server-node.js",
+    "test": "nyc --reporter=html --reporter=text mocha",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",
@@ -37,5 +38,11 @@
     "parallel-http-request": "^1.1.3",
     "uuid": "^3.3.3",
     "yargs": "^15.1.0"
+  },
+  "devDependencies": {
+    "coveralls": "^3.0.9",
+    "mocha": "^7.0.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nyc": "^15.0.0"
   }
 }

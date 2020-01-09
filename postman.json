@@ -1,0 +1,276 @@
+{
+	"info": {
+		"_postman_id": "16e68435-11ba-4539-8b19-9b6a1d0e35c0",
+		"name": "Cluster Static Server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "master",
+			"item": [
+				{
+					"name": "Get File",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/<node_prefix>/get/<year>/<month>/<date>/<filename>",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"<node_prefix>",
+								"get",
+								"<year>",
+								"<month>",
+								"<date>",
+								"<filename>"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Random to All Node",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x_token",
+								"value": "12345678",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"description": "Choose file to upload",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remote Upload Random to All Node",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x_token",
+								"value": "12345678",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"url\":\"https://example.com/picture.jpg\",\n\t\"filename\":\"picture.png\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/upload/remote",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"upload",
+								"remote"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x_token",
+								"value": "12345678",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"node\":\"ns1\",\n\t\"year\":\"2020\",\n\t\"month\":\"01\",\n\t\"date\":\"08\",\n\t\"filename\":\"b6dae161-f17d-4a97-9d0d-ac3ae24effa2.png\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3000/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cleanup Temporary Files",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x_token",
+								"value": "12345678",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/cleanup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"cleanup"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "node",
+			"item": [
+				{
+					"name": "Get File",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/get/<year>/<month>/<date>/<filename>",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"get",
+								"<year>",
+								"<month>",
+								"<date>",
+								"<filename>"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x_token",
+								"type": "text",
+								"value": "87654321"
+							},
+							{
+								"key": "origin",
+								"value": "http://localhost:3000",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"description": "Choose file to upload",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3001/node/upload",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"node",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "x_token",
+								"value": "87654321",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"year\":\"2020\",\n\t\"month\":\"01\",\n\t\"date\":\"08\",\n\t\"filename\":\"91ef2bf3-ccd1-4247-8084-129e6e00db53.png\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3001/node/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"node",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
