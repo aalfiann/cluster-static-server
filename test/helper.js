@@ -99,12 +99,14 @@ describe('helper function test', function(){
         this.timeout('10000');
         helper.fileDownloadPromise('','test/test-catch.png').then((result)=>{
             if(result) {
-                var downloaded = fs.existsSync('test/test-ssl.png');
+                var downloaded = fs.existsSync('test/test-catch.png');
                 assert.equal(downloaded,true);
                 done();
             }
         }).catch((err) => {
-            fs.unlinkSync('test/test-catch.png');
+            if(fs.existsSync('test/test-catch.png')) {
+                fs.unlinkSync('test/test-catch.png');
+            }
             done(err);
         });
     });
