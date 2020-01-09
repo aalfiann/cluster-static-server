@@ -31,10 +31,10 @@ server.register(require('./routes/default.js'));
 server.register(require('./routes/master.js'));
 
 // Custom Error Handler
-// server.setErrorHandler(function (error, request, reply) {
-//   server.log.error(error);
-//   reply.send({status:500,message:'Whoops, Something went wrong!'});
-// });
+server.setErrorHandler(function (error, request, reply) {
+  server.log.error(error);
+  reply.send({status:500,message:'Whoops, Something went wrong!'});
+});
 
 server.listen(config.masterPort, function (err, address) {
   if (err) {
