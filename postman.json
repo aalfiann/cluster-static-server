@@ -87,7 +87,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"url\":\"https://example.com/picture.jpg\",\n\t\"filename\":\"picture.png\"\n}"
+							"raw": "{\n\t\"url\":\"https://example.com/picture.jpg\",\n\t\"filename\":\"picture.jpg\"\n}"
 						},
 						"url": {
 							"raw": "http://localhost:3000/upload/remote",
@@ -123,7 +123,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"node\":\"ns1\",\n\t\"year\":\"2020\",\n\t\"month\":\"01\",\n\t\"date\":\"08\",\n\t\"filename\":\"b6dae161-f17d-4a97-9d0d-ac3ae24effa2.png\"\n}"
+							"raw": "{\n\t\"node\":\"ns1\",\n\t\"year\":\"2020\",\n\t\"month\":\"01\",\n\t\"date\":\"01\",\n\t\"filename\":\"picture.jpg\"\n}"
 						},
 						"url": {
 							"raw": "http://localhost:3000/delete",

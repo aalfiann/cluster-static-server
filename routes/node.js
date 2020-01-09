@@ -53,13 +53,14 @@ async function nodeRoute (server, options) {
     server.post('/node/delete', async function(request, reply) {
         var data = request.body;
         if(data.year && data.month && data.date && data.filename) {
-            fs.unlink(config_node+'/'+data.year+'/'+data.month+'/'+data.date+'/'+data.filename,function(err) {
+            fs.unlink(config_node.staticDirPath+'/'+data.year+'/'+data.month+'/'+data.date+'/'+data.filename,function(err) {
                 if(err) return reply.code(404).send({status:404,message:"Failed to delete! File not found!"});
                 reply.send({status:200,message:'Delete file successfully!'});
             });
         } else {
             reply.code(400).send({status:400,message:"Bad Request!"});
         }
+        await reply;
     });
 
 }

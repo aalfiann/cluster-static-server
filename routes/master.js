@@ -77,7 +77,10 @@ async function masterRoute (server, options) {
                 transfer.add({
                     url: listhost[0].upstream+'/node/delete',
                     method: 'post',
-                    headers:{'Content-Type':'application/json'},
+                    headers:{
+                        'Content-Type':'application/json',
+                        'x_token':config.node_x_token
+                    },
                     body: {
                         year:data.year,
                         month:data.month,
@@ -98,6 +101,7 @@ async function masterRoute (server, options) {
         } else {
             reply.code(400).send({status:400,message:"Bad Request!"});
         }
+        await reply;
     });
 
     server.post('/cleanup', async function(request, reply) {
