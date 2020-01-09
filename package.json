@@ -1,0 +1,41 @@
+{
+  "name": "cluster-static-server",
+  "version": "1.0.0",
+  "description": "Cluster Static Server based on Fastify NodeJS.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "master": "node server-master.js",
+    "node": "node server-node.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aalfiann/cluster-static-server.git"
+  },
+  "keywords": [
+    "static-server",
+    "static-server-api",
+    "static-server-nodejs",
+    "scalable-static-server",
+    "cluster-static-server"
+  ],
+  "author": "M ABD AZIZ ALFIAN",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aalfiann/cluster-static-server/issues"
+  },
+  "homepage": "https://github.com/aalfiann/cluster-static-server#readme",
+  "dependencies": {
+    "fastify": "^2.11.0",
+    "fastify-file-upload": "^2.0.1",
+    "fastify-http-proxy": "^2.3.0",
+    "fastify-static": "^2.5.1",
+    "fly-json-odm": "^1.9.1",
+    "mime-db": "^1.43.0",
+    "mime-lookup": "0.0.2",
+    "mkdir-recursive": "^0.4.0",
+    "parallel-http-request": "^1.1.3",
+    "uuid": "^3.3.3",
+    "yargs": "^15.1.0"
+  }
+}
