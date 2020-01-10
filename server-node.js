@@ -5,7 +5,9 @@ const server = require('fastify')({
 });
 
 server.register(require('fastify-file-upload'), {
-    limits: { fileSize: config.limitSize }
+    limits: { fileSize: config.limitSize },
+    useTempFiles : true,
+    tempFileDir : 'temp/'
 });
 
 server.register(require('fastify-static'), {
