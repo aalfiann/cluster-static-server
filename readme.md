@@ -1,4 +1,5 @@
 # cluster-static-server
+![Version](https://img.shields.io/github/package-json/v/aalfiann/cluster-static-server)
 [![Build Status](https://travis-ci.com/aalfiann/cluster-static-server.svg?branch=master)](https://travis-ci.com/aalfiann/cluster-static-server)
 [![Coverage Status](https://coveralls.io/repos/github/aalfiann/cluster-static-server/badge.svg?branch=master)](https://coveralls.io/github/aalfiann/cluster-static-server?branch=master)
 [![Known Vulnerabilities](https://snyk.io//test/github/aalfiann/cluster-static-server/badge.svg?targetFile=package.json)](https://snyk.io//test/github/aalfiann/cluster-static-server?targetFile=package.json)
@@ -28,6 +29,7 @@ The main problem of a static server is when you have limit with your server stor
 - Get File
 - Delete File
 - Cleanup Temporary File
+- Status All Nodes
 
 ### Get Started
 1. Clone or Download this repo.

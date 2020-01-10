@@ -5,6 +5,11 @@ const config_node = require('../config-node.js');
 const fs = require('fs');
 
 async function nodeRoute (server, options) {
+
+    server.get('/status', async function (request, reply) {
+        reply.send({status:reply.statusCode});
+    });
+
     server.get('/get/:year/:month/:date/:filename', async function (request, reply) {
         reply.sendFile(request.params.year+'/'+request.params.month+'/'+request.params.date+'/'+request.params.filename);
     });

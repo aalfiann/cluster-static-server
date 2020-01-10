@@ -10,6 +10,26 @@ const ParallelRequest = require('parallel-http-request');
 
 async function masterRoute (server, options) {
 
+    server.get('/status', async function (request, reply) {
+        var ping = new ParallelRequest();
+
+        for(var i=0;i<config.nodeServer.length;i++) {
+            ping.add({
+                url:config.nodeServer[i].upstream+'/status',
+                method:'get',
+                headers:{
+                    'Accept':'application/json'
+                },
+                timeout:30
+            });
+        }
+
+        ping.send(function(res) {
+            reply.send({status:200,message:'Process get status all nodes completed!',response:res});
+        });
+        await reply;
+    });
+
     server.post('/upload', async function (request, reply) {
         if(request.raw.files) {
             const files = request.raw.files;

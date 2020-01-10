@@ -33,6 +33,25 @@
 					"response": []
 				},
 				{
+					"name": "Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Upload Random to All Node",
 					"request": {
 						"method": "POST",
@@ -187,6 +206,25 @@
 								"<month>",
 								"<date>",
 								"<filename>"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3001/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3001",
+							"path": [
+								"status"
 							]
 						}
 					},
