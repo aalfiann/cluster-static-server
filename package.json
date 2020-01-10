@@ -1,6 +1,6 @@
 {
   "name": "cluster-static-server",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Cluster Static Server based on Fastify NodeJS.",
   "main": "app.js",
   "scripts": {

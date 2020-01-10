@@ -44,8 +44,8 @@ async function masterRoute (server, options) {
                 });
             }
             
-            if(fs.existsSync(fileArr[0].tempFilePath)) {
-                fs.renameSync(fileArr[0].tempFilePath,fileArr[0].tempFilePath+'.'+fileArr[0].ext);
+            if(fs.existsSync(path.normalize(fileArr[0].tempFilePath))) {
+                fs.renameSync(path.normalize(fileArr[0].tempFilePath),path.normalize(fileArr[0].tempFilePath+'.'+fileArr[0].ext));
 
                 var nosql = new FlyJson();
                 var result = nosql.set(config.nodeServer);
@@ -64,7 +64,7 @@ async function masterRoute (server, options) {
                 ]);
 
                 ls.stdout.on("data", function(data) {
-                    fs.unlink(fileArr[0].tempFilePath+'.'+fileArr[0].ext,function(err){
+                    fs.unlink(path.normalize(fileArr[0].tempFilePath+'.'+fileArr[0].ext),function(err){
                         if(err) console.log(err);
                     });
                     var result = JSON.parse(data.toString());
@@ -72,7 +72,7 @@ async function masterRoute (server, options) {
                         result.body[0].name = fileArr[0].name;
                         reply.code(result.status).send({status:result.status,message:'Upload file successfully!',response:result.body[0]});
                     } else {
-                        reply.code(result.status).send({status:result.status,message:result.body[0].message});
+                        reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
                     }
                 });
 
@@ -85,6 +85,7 @@ async function masterRoute (server, options) {
         } else {
             reply.code(400).send({status:400,message:'Bad Request!'});
         }
+        await reply;
     });
 
     server.post('/delete', async function(request, reply) {
@@ -134,7 +135,7 @@ async function masterRoute (server, options) {
                 if (err) console.log(err);
               });
             }
-            fs.closeSync(fs.openSync(directory+'/.gitkeep', 'w'));
+            fs.closeSync(fs.openSync(path.normalize(directory+'/.gitkeep'), 'w'));
         });
         reply.send({status:200,message:'Cleanup all temporary files successfully!'});
     });
@@ -146,7 +147,7 @@ async function masterRoute (server, options) {
             var url = body.url.trim();
             var downloaded = await helper.fileDownload(url,directory+body.filename);
             if(downloaded) {
-                if(fs.existsSync(directory+body.filename)) {
+                if(fs.existsSync(path.normalize(directory+body.filename))) {
         
                     var nosql = new FlyJson();
                     var result = nosql.set(config.nodeServer);
@@ -159,13 +160,13 @@ async function masterRoute (server, options) {
                     
                     const ls = spawn("node", ["./transfer.js",
                         "-u", host.upstream+"/node/upload", 
-                        "-f", directory+body.filename, 
+                        "-f", path.normalize(directory+body.filename), 
                         "-x", config.node_x_token,
                         "-o", config.origin
                     ]);
                     
                     ls.stdout.on("data", function(data) {
-                        fs.unlink(directory+body.filename,function(err){
+                        fs.unlink(path.normalize(directory+body.filename),function(err){
                             if(err) console.log(err);
                         });
                         var result = JSON.parse(data.toString());

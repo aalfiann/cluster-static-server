@@ -3,6 +3,7 @@ const fx = require('mkdir-recursive');
 const uuidv4 = require('uuid/v4');
 const config_node = require('../config-node.js');
 const fs = require('fs');
+const path = require('path');
 
 async function nodeRoute (server, options) {
 
@@ -23,11 +24,11 @@ async function nodeRoute (server, options) {
             for(let key in files){
                 var error = '';
                 if(helper.isAllowedMime(files[key].mimetype)) {
-                    fx.mkdirSync(config_node.staticDirPath+'/'+dirpath);
+                    fx.mkdirSync(path.normalize(config_node.staticDirPath+'/'+dirpath));
                     var fileid = uuidv4();
                     var filename = fileid+helper.getExtension(files[key].name);
                     var filepath = config_node.staticDirPath+'/'+dirpath+'/'+filename;
-                    files[key].mv(filepath, function(err) {
+                    files[key].mv(path.normalize(filepath), function(err) {
                         if(err) error = err;
                     });
                     fileArr.push({
@@ -53,12 +54,13 @@ async function nodeRoute (server, options) {
         } else {
             reply.code(400).send({status:400,message:'Bad Request!'});
         }
+        await reply;
     });
 
     server.post('/node/delete', async function(request, reply) {
         var data = request.body;
         if(data.year && data.month && data.date && data.filename) {
-            fs.unlink(config_node.staticDirPath+'/'+data.year+'/'+data.month+'/'+data.date+'/'+data.filename,function(err) {
+            fs.unlink(path.normalize(config_node.staticDirPath+'/'+data.year+'/'+data.month+'/'+data.date+'/'+data.filename),function(err) {
                 if(err) return reply.code(404).send({status:404,message:"Failed to delete! File not found!"});
                 reply.send({status:200,message:'Delete file successfully!'});
             });

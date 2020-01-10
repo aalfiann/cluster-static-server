@@ -37,7 +37,7 @@ const options = yargs
     }
 
     if(isValidURL(options.url)) {
-        var size = fs.statSync(path.resolve(options.file)).size;
+        var size = fs.statSync(path.normalize(options.file)).size;
         if(size > 0) {
             var transfer = new ParallelRequest();
             transfer.add({
