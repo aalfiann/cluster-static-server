@@ -21,38 +21,38 @@ async function nodeRoute (server, options) {
         if(request.raw.files) {
             var dt = helper.jsonDate();
             var dirpath = dt.year+'/'+dt.month+'/'+dt.date;
-            await mkdirp(path.normalize(config_node.staticDirPath+'/'+dirpath));
-            const files = request.raw.files;
-            let fileArr = [];
-            for(let key in files){
-                var error = '';
-                if(helper.isAllowedMime(files[key].mimetype)) {
-                    var fileid = uuidv4();
-                    var filename = fileid+helper.getExtension(files[key].name);
-                    var filepath = config_node.staticDirPath+'/'+dirpath+'/'+filename;
-                    files[key].mv(path.normalize(filepath), function(err) {
-                        if(err) error = err;
-                    });
-                    fileArr.push({
-                        id: fileid,
-                        name: files[key].name,
-                        mimetype: files[key].mimetype,
-                        size: files[key].size,
-                        path:request.headers.origin+config_node.nodePrefixName+'/get/'+dirpath+'/'+filename,
-                        error: error
-                    });
-                } else {
-                    fileArr.push({
-                        id: '',
-                        name: files[key].name,
-                        mimetype: files[key].mimetype,
-                        size:0,
-                        path:'',
-                        error: 'This file is not allowed!'
-                    });
+            mkdirp(path.normalize(config_node.staticDirPath+'/'+dirpath)).then((made) => {
+                const files = request.raw.files;
+                let fileArr = [];
+                for(let key in files){
+                    var error = '';
+                    if(helper.isAllowedMime(files[key].mimetype)) {
+                        var fileid = uuidv4();
+                        var filename = fileid+helper.getExtension(files[key].name);
+                        files[key].mv(path.normalize(made+'/'+filename), function(err) {
+                            if(err) error = err;
+                        });
+                        fileArr.push({
+                            id: fileid,
+                            name: files[key].name,
+                            mimetype: files[key].mimetype,
+                            size: files[key].size,
+                            path:request.headers.origin+config_node.nodePrefixName+'/get/'+dirpath+'/'+filename,
+                            error: error
+                        });
+                    } else {
+                        fileArr.push({
+                            id: '',
+                            name: files[key].name,
+                            mimetype: files[key].mimetype,
+                            size:0,
+                            path:'',
+                            error: 'This file is not allowed!'
+                        });
+                    }
                 }
-            }
-            reply.send(fileArr);
+                reply.send(fileArr);
+            });
         } else {
             reply.code(400).send({status:400,message:'Bad Request!'});
         }
