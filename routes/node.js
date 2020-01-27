@@ -1,7 +1,7 @@
 const helper = require('../lib/helper.js');
-const fx = require('mkdir-recursive');
 const uuidv4 = require('uuid/v4');
 const config_node = require('../config-node.js');
+const mkdirp = require('mkdirp');
 const fs = require('fs');
 const path = require('path');
 
@@ -9,22 +9,24 @@ async function nodeRoute (server, options) {
 
     server.get('/status', async function (request, reply) {
         reply.send({status:reply.statusCode});
+        await reply;
     });
 
     server.get('/get/:year/:month/:date/:filename', async function (request, reply) {
         reply.sendFile(request.params.year+'/'+request.params.month+'/'+request.params.date+'/'+request.params.filename);
+        await reply;
     });
 
     server.post('/node/upload', async function (request, reply) {
         if(request.raw.files) {
-            const files = request.raw.files;
             var dt = helper.jsonDate();
             var dirpath = dt.year+'/'+dt.month+'/'+dt.date;
+            await mkdirp(path.normalize(config_node.staticDirPath+'/'+dirpath));
+            const files = request.raw.files;
             let fileArr = [];
             for(let key in files){
                 var error = '';
                 if(helper.isAllowedMime(files[key].mimetype)) {
-                    fx.mkdirSync(path.normalize(config_node.staticDirPath+'/'+dirpath));
                     var fileid = uuidv4();
                     var filename = fileid+helper.getExtension(files[key].name);
                     var filepath = config_node.staticDirPath+'/'+dirpath+'/'+filename;

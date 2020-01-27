@@ -36,29 +36,41 @@ const options = yargs
         return !!pattern.test(str);
     }
 
+    function getFileSize(file) {
+        return new Promise((resolve,reject) => {
+            fs.stat(path.normalize(file),function(err, stat){
+                if (err) return reject(err);
+                resolve(stat['size']);
+            });
+        });
+    }
+
     if(isValidURL(options.url)) {
-        var size = fs.statSync(path.normalize(options.file)).size;
-        if(size > 0) {
-            var transfer = new ParallelRequest();
-            transfer.add({
-                url: options.url,
-                method: 'post',
-                headers: {
-                    'origin':options.origin,
-                    'x_token':options.x_token,
-                    'Content-Type': 'multipart/form-data',
-                    'Content-Length': size
-                },
-                attach: {
-                    'file': options.file
-                }
-            });
-            transfer.send(function(response) {
-                console.log(JSON.stringify(response[0]));
-            });
-        } else {
-            console.log(JSON.stringify({status:400,message: 'File is broken or corrupted!'}));
-        }
+        getFileSize(options.file).then((size) => {
+            if(size > 0) {
+                var transfer = new ParallelRequest();
+                transfer.add({
+                    url: options.url,
+                    method: 'post',
+                    headers: {
+                        'origin':options.origin,
+                        'x_token':options.x_token,
+                        'Content-Type': 'multipart/form-data',
+                        'Content-Length': size
+                    },
+                    attach: {
+                        'file': options.file
+                    }
+                });
+                transfer.send(function(response) {
+                    console.log(JSON.stringify(response[0]));
+                });
+            } else {
+                console.log(JSON.stringify({status:400,message: 'File is broken or corrupted!'}));
+            }
+        }).catch((err) => {
+            console.log(JSON.stringify({status:400,message: 'File is broken or corrupted!', error: err}));
+        });
     } else {
         console.log(JSON.stringify({status:400,message: 'Your url is not valid!'}));
     }

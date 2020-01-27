@@ -43,45 +43,51 @@ async function masterRoute (server, options) {
                     tempFilePath:files[key].tempFilePath,
                 });
             }
-            
-            if(fs.existsSync(path.normalize(fileArr[0].tempFilePath))) {
-                fs.renameSync(path.normalize(fileArr[0].tempFilePath),path.normalize(fileArr[0].tempFilePath+'.'+fileArr[0].ext));
 
-                var nosql = new FlyJson();
-                var result = nosql.set(config.nodeServer);
-                var x = config.blockNode;
-                for(var z=0;z<x.length;z++) {
-                    result.where('prefix', '!=', x[z]);
-                }
-                var listhost = result.exec();
-                var host = listhost[helper.randomItem(listhost)];
-                
-                const ls = spawn("node", ["./transfer.js",
-                    "-u", host.upstream+"/node/upload", 
-                    "-f", fileArr[0].tempFilePath+'.'+fileArr[0].ext, 
-                    "-x", config.node_x_token,
-                    "-o", config.origin
-                ]);
+            fs.access(path.normalize(fileArr[0].tempFilePath), fs.constants.F_OK, err => {
+                if(!err) {
+                    fs.rename(path.normalize(fileArr[0].tempFilePath), path.normalize(fileArr[0].tempFilePath+'.'+fileArr[0].ext), err => {
+                        if(!err) {
+                            var nosql = new FlyJson();
+                            var result = nosql.set(config.nodeServer);
+                            var x = config.blockNode;
+                            for(var z=0;z<x.length;z++) {
+                                result.where('prefix', '!=', x[z]);
+                            }
+                            var listhost = result.exec();
+                            var host = listhost[helper.randomItem(listhost)];
+                            
+                            const ls = spawn("node", ["./transfer.js",
+                                "-u", host.upstream+"/node/upload", 
+                                "-f", fileArr[0].tempFilePath+'.'+fileArr[0].ext, 
+                                "-x", config.node_x_token,
+                                "-o", config.origin
+                            ]);
 
-                ls.stdout.on("data", function(data) {
-                    fs.unlink(path.normalize(fileArr[0].tempFilePath+'.'+fileArr[0].ext),function(err){
-                        if(err) console.log(err);
+                            ls.stdout.on("data", function(data) {
+                                fs.unlink(path.normalize(fileArr[0].tempFilePath+'.'+fileArr[0].ext),function(err){
+                                    if(err) console.log(err);
+                                });
+                                var result = JSON.parse(data.toString());
+                                if(result.status === 200) {
+                                    result.body[0].name = fileArr[0].name;
+                                    reply.code(result.status).send({status:result.status,message:'Upload file successfully!',response:result.body[0]});
+                                } else {
+                                    reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
+                                }
+                            });
+
+                            ls.stderr.on("data", function(data) {
+                                reply.code(500).send({status:500,message:'Something went wrong!',error:data.toString()});
+                            });
+                        } else {
+                            reply.code(409).send({status:409,message:'Failed to rename file! Permission denied!'});
+                        }
                     });
-                    var result = JSON.parse(data.toString());
-                    if(result.status === 200) {
-                        result.body[0].name = fileArr[0].name;
-                        reply.code(result.status).send({status:result.status,message:'Upload file successfully!',response:result.body[0]});
-                    } else {
-                        reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
-                    }
-                });
-
-                ls.stderr.on("data", function(data) {
-                    reply.code(500).send({status:500,message:'Something went wrong!',error:data.toString()});
-                });
-            } else {
-                reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
-            }
+                } else {
+                    reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
+                }
+            });
         } else {
             reply.code(400).send({status:400,message:'Bad Request!'});
         }
@@ -129,13 +135,18 @@ async function masterRoute (server, options) {
         var directory = path.join(__dirname,'../temp/');
         fs.readdir(directory, (err, files) => {
             if (err) console.log(err);
-          
+
             for (const file of files) {
-              fs.unlink(path.join(directory, file), err => {
-                if (err) console.log(err);
-              });
+                (function(alias){
+                    fs.unlink(path.join(directory, alias), err => {
+                        if (err) console.log(err);
+                    });
+                })(file);
             }
-            fs.closeSync(fs.openSync(path.normalize(directory+'/.gitkeep'), 'w'));
+
+            fs.writeFile(path.normalize(directory+'/.gitkeep'), '', (err) => {
+                if (err) console.log(err);
+            });
         });
         reply.send({status:200,message:'Cleanup all temporary files successfully!'});
     });
@@ -147,43 +158,44 @@ async function masterRoute (server, options) {
             var url = body.url.trim();
             var downloaded = await helper.fileDownload(url,directory+body.filename);
             if(downloaded) {
-                if(fs.existsSync(path.normalize(directory+body.filename))) {
-        
-                    var nosql = new FlyJson();
-                    var result = nosql.set(config.nodeServer);
-                    var x = config.blockNode;
-                    for(var z=0;z<x.length;z++) {
-                        result.where('prefix', '!=', x[z]);
-                    }
-                    var listhost = result.exec();
-                    var host = listhost[helper.randomItem(listhost)];
-                    
-                    const ls = spawn("node", ["./transfer.js",
-                        "-u", host.upstream+"/node/upload", 
-                        "-f", path.normalize(directory+body.filename), 
-                        "-x", config.node_x_token,
-                        "-o", config.origin
-                    ]);
-                    
-                    ls.stdout.on("data", function(data) {
-                        fs.unlink(path.normalize(directory+body.filename),function(err){
-                            if(err) console.log(err);
-                        });
-                        var result = JSON.parse(data.toString());
-                        if(result.status === 200) {
-                            result.body[0].name = body.filename;
-                            reply.code(result.status).send({status:result.status,message:'Upload file successfully!',response:result.body[0]});
-                        } else {
-                            reply.code(result.status).send({status:result.status,message:result.body[0].message});
+                fs.access(path.normalize(directory+body.filename), fs.constants.F_OK, err => {
+                    if(!err) {
+                        var nosql = new FlyJson();
+                        var result = nosql.set(config.nodeServer);
+                        var x = config.blockNode;
+                        for(var z=0;z<x.length;z++) {
+                            result.where('prefix', '!=', x[z]);
                         }
-                    });
+                        var listhost = result.exec();
+                        var host = listhost[helper.randomItem(listhost)];
+                        
+                        const ls = spawn("node", ["./transfer.js",
+                            "-u", host.upstream+"/node/upload", 
+                            "-f", path.normalize(directory+body.filename), 
+                            "-x", config.node_x_token,
+                            "-o", config.origin
+                        ]);
+                        
+                        ls.stdout.on("data", function(data) {
+                            fs.unlink(path.normalize(directory+body.filename),function(err){
+                                if(err) console.log(err);
+                            });
+                            var result = JSON.parse(data.toString());
+                            if(result.status === 200) {
+                                result.body[0].name = body.filename;
+                                reply.code(result.status).send({status:result.status,message:'Upload file successfully!',response:result.body[0]});
+                            } else {
+                                reply.code(result.status).send({status:result.status,message:result.body[0].message});
+                            }
+                        });
 
-                    ls.stderr.on("data", function(data) {
-                        reply.code(500).send({status:500,message:'Something went wrong!',error:data.toString()});
-                    });
-                } else {
-                    reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
-                }
+                        ls.stderr.on("data", function(data) {
+                            reply.code(500).send({status:500,message:'Something went wrong!',error:data.toString()});
+                        });
+                    } else {
+                        reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
+                    }
+                });
             } else {
                 reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
             }
