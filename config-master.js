@@ -26,6 +26,9 @@ const config_master = {
     // Block upload to spesific node destination. 
     blockNode: [], // Ex. ['/ns2','/ns3'] means the file will not upload to /n2 and /ns3.
 
+    // Use Worker / CPU Cluster
+    useWorker: true,
+
     // Print the log
     logger: true
     

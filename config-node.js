@@ -13,6 +13,9 @@ const config_node = {
     // set directory path location for static file 
     staticDirPath: 'public', // without leading and trailing slash
 
+    // Use Worker / CPU Cluster
+    useWorker: true,
+
     // Print the log
     logger: true,
     

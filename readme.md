@@ -23,7 +23,8 @@ The main problem of a static server is when you have limit with your server stor
   This cluster static server was created with Fastify NodeJS Framework which is the fastest and very low overhead of any NodeJS framework out there. You can start with single or multiple shared hosting to implement this cluster static server.
 
 ## Features
-- Cluster
+- Cluster Storage
+- Cluster CPU
 - Upload File
 - Remote Upload File
 - Get File
@@ -39,8 +40,8 @@ The main problem of a static server is when you have limit with your server stor
 5. Done
 
 ### How to run the server
-- To start master server `$ npm run master`.
-- To start node server `$ npm run node`.
+- To start master server `$ npm run master` or `$ node server-master.js`.
+- To start node server `$ npm run node` or `$ node server-node.js`.
 
 **Note :**
 - You are able to start master and node server in same machine server with different port. But, actualy Master and Node server should be on different machine server so you will get the best performance.

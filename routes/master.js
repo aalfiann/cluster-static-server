@@ -49,36 +49,40 @@ async function masterRoute (server, options) {
                     fs.rename(path.normalize(fileArr[0].tempFilePath), path.normalize(fileArr[0].tempFilePath+'.'+fileArr[0].ext), err => {
                         if(!err) {
                             var nosql = new FlyJson();
-                            var result = nosql.set(config.nodeServer);
-                            var x = config.blockNode;
-                            for(var z=0;z<x.length;z++) {
-                                result.where('prefix', '!=', x[z]);
-                            }
-                            var listhost = result.exec();
-                            var host = listhost[helper.randomItem(listhost)];
-                            
-                            const ls = spawn("node", ["./transfer.js",
-                                "-u", host.upstream+"/node/upload", 
-                                "-f", fileArr[0].tempFilePath+'.'+fileArr[0].ext, 
-                                "-x", config.node_x_token,
-                                "-o", config.origin
-                            ]);
-
-                            ls.stdout.on("data", function(data) {
-                                fs.unlink(path.normalize(fileArr[0].tempFilePath+'.'+fileArr[0].ext),function(err){
-                                    if(err) console.log(err);
-                                });
-                                var result = JSON.parse(data.toString());
-                                if(result.status === 200) {
-                                    result.body[0].name = fileArr[0].name;
-                                    reply.code(result.status).send({status:result.status,message:'Upload file successfully!',response:result.body[0]});
-                                } else {
-                                    reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
+                            nosql.promisify((builder) => {return builder}).then((table) => {
+                                var result = table.set(config.nodeServer);
+                                var x = config.blockNode;
+                                for(var z=0;z<x.length;z++) {
+                                    result.where('prefix', '!=', x[z]);
                                 }
-                            });
+                                var listhost = result.exec();
+                                var host = listhost[helper.randomItem(listhost)];
+                                
+                                const ls = spawn("node", ["./transfer.js",
+                                    "-u", host.upstream+"/node/upload", 
+                                    "-f", fileArr[0].tempFilePath+'.'+fileArr[0].ext, 
+                                    "-x", config.node_x_token,
+                                    "-o", config.origin
+                                ]);
 
-                            ls.stderr.on("data", function(data) {
-                                reply.code(500).send({status:500,message:'Something went wrong!',error:data.toString()});
+                                ls.stdout.on("data", function(data) {
+                                    fs.unlink(path.normalize(fileArr[0].tempFilePath+'.'+fileArr[0].ext),function(err){
+                                        if(err) console.log(err);
+                                    });
+                                    var result = JSON.parse(data.toString());
+                                    if(result.status === 200) {
+                                        result.body[0].name = fileArr[0].name;
+                                        reply.code(result.status).send({status:result.status,message:'Upload file successfully!',response:result.body[0]});
+                                    } else {
+                                        reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
+                                    }
+                                });
+
+                                ls.stderr.on("data", function(data) {
+                                    reply.code(500).send({status:500,message:'Something went wrong!',error:data.toString()});
+                                });
+                            }).catch((err) => {
+                                reply.code(409).send({status:409,message:'Failed to upload! Wrong configuration!'});
                             });
                         } else {
                             reply.code(409).send({status:409,message:'Failed to rename file! Permission denied!'});
@@ -98,33 +102,37 @@ async function masterRoute (server, options) {
         var data = request.body;
         if(data.node && data.year && data.month && data.date && data.filename) {
             var nosql = new FlyJson();
-            var listhost = nosql.set(config.nodeServer).where('prefix','==','/'+data.node.toLowerCase()).exec(); 
-            if(listhost.length > 0) {
-                var transfer = new ParallelRequest();
-                transfer.add({
-                    url: listhost[0].upstream+'/node/delete',
-                    method: 'post',
-                    headers:{
-                        'Content-Type':'application/json',
-                        'x_token':config.node_x_token
-                    },
-                    body: {
-                        year:data.year,
-                        month:data.month,
-                        date:data.date,
-                        filename:data.filename
-                    }
-                });
-                transfer.send(function(response) {
-                    if(response[0].status === 200) {
-                        reply.send({status:200,message:"File deleted successfully!"});
-                    } else {
-                        reply.code(response[0].status).send({status:response[0].status,message:response[0].body.message});
-                    }
-                });
-            } else {
-                reply.code(404).send({status:404,message:"File not found!"});
-            }
+            nosql.promisify((builder) => {return builder}).then((table) => {
+                var listhost = table.set(config.nodeServer).where('prefix','==','/'+data.node.toLowerCase()).exec(); 
+                if(listhost.length > 0) {
+                    var transfer = new ParallelRequest();
+                    transfer.add({
+                        url: listhost[0].upstream+'/node/delete',
+                        method: 'post',
+                        headers:{
+                            'Content-Type':'application/json',
+                            'x_token':config.node_x_token
+                        },
+                        body: {
+                            year:data.year,
+                            month:data.month,
+                            date:data.date,
+                            filename:data.filename
+                        }
+                    });
+                    transfer.send(function(response) {
+                        if(response[0].status === 200) {
+                            reply.send({status:200,message:"File deleted successfully!"});
+                        } else {
+                            reply.code(response[0].status).send({status:response[0].status,message:response[0].body.message});
+                        }
+                    });
+                } else {
+                    reply.code(404).send({status:404,message:"File not found!"});
+                }
+            }).catch((err) => {
+                reply.code(409).send({status:409,message:'Failed to delete file! Wrong configuration!'});
+            });
         } else {
             reply.code(400).send({status:400,message:"Bad Request!"});
         }
@@ -161,36 +169,40 @@ async function masterRoute (server, options) {
                 fs.access(path.normalize(directory+body.filename), fs.constants.F_OK, err => {
                     if(!err) {
                         var nosql = new FlyJson();
-                        var result = nosql.set(config.nodeServer);
-                        var x = config.blockNode;
-                        for(var z=0;z<x.length;z++) {
-                            result.where('prefix', '!=', x[z]);
-                        }
-                        var listhost = result.exec();
-                        var host = listhost[helper.randomItem(listhost)];
-                        
-                        const ls = spawn("node", ["./transfer.js",
-                            "-u", host.upstream+"/node/upload", 
-                            "-f", path.normalize(directory+body.filename), 
-                            "-x", config.node_x_token,
-                            "-o", config.origin
-                        ]);
-                        
-                        ls.stdout.on("data", function(data) {
-                            fs.unlink(path.normalize(directory+body.filename),function(err){
-                                if(err) console.log(err);
-                            });
-                            var result = JSON.parse(data.toString());
-                            if(result.status === 200) {
-                                result.body[0].name = body.filename;
-                                reply.code(result.status).send({status:result.status,message:'Upload file successfully!',response:result.body[0]});
-                            } else {
-                                reply.code(result.status).send({status:result.status,message:result.body[0].message});
+                        nosql.promisify((builder) => {return builder}).then((table) => {
+                            var result = table.set(config.nodeServer);
+                            var x = config.blockNode;
+                            for(var z=0;z<x.length;z++) {
+                                result.where('prefix', '!=', x[z]);
                             }
-                        });
+                            var listhost = result.exec();
+                            var host = listhost[helper.randomItem(listhost)];
+                            
+                            const ls = spawn("node", ["./transfer.js",
+                                "-u", host.upstream+"/node/upload", 
+                                "-f", path.normalize(directory+body.filename), 
+                                "-x", config.node_x_token,
+                                "-o", config.origin
+                            ]);
+                            
+                            ls.stdout.on("data", function(data) {
+                                fs.unlink(path.normalize(directory+body.filename),function(err){
+                                    if(err) console.log(err);
+                                });
+                                var result = JSON.parse(data.toString());
+                                if(result.status === 200) {
+                                    result.body[0].name = body.filename;
+                                    reply.code(result.status).send({status:result.status,message:'Upload file successfully!',response:result.body[0]});
+                                } else {
+                                    reply.code(result.status).send({status:result.status,message:result.body[0].message});
+                                }
+                            });
 
-                        ls.stderr.on("data", function(data) {
-                            reply.code(500).send({status:500,message:'Something went wrong!',error:data.toString()});
+                            ls.stderr.on("data", function(data) {
+                                reply.code(500).send({status:500,message:'Something went wrong!',error:data.toString()});
+                            });
+                        }).catch((err) => {
+                            reply.code(409).send({status:409,message:'Failed to upload! Wrong configuration network!'});
                         });
                     } else {
                         reply.code(409).send({status:409,message:'Failed to upload! Please try again!'});
